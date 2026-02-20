@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CompletedOrder } from '../../models/CompletedOrder';
 
 interface CompletedOrdersModalProps {
   isOpen: boolean;
   onClose: () => void;
   orders: CompletedOrder[];
-  onInvoice: (orderId: string) => void;
+  onInvoice: (orderId: number, nombreCliente: string) => Promise<number> | number;
+  loading?: boolean;
+  error?: string | null;
+  invoiceLoadingById?: Record<string, boolean>;
+  invoiceErrorById?: Record<string, string>;
 }
 
 const FOCUSABLE_SELECTOR =
@@ -16,9 +20,18 @@ export const CompletedOrdersModal = ({
   onClose,
   orders,
   onInvoice,
+  loading = false,
+  error = null,
+  invoiceLoadingById = {},
+  invoiceErrorById = {},
 }: CompletedOrdersModalProps) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const [customerNames, setCustomerNames] = useState<Record<string, string>>({});
+  const [showNameInput, setShowNameInput] = useState<Record<string, boolean>>(
+    {}
+  );
+  const [nameErrors, setNameErrors] = useState<Record<string, string>>({});
 
   const sortedOrders = useMemo(() => {
     return [...orders].sort(
@@ -82,6 +95,14 @@ export const CompletedOrdersModal = ({
     };
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setCustomerNames({});
+      setShowNameInput({});
+      setNameErrors({});
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -124,7 +145,23 @@ export const CompletedOrdersModal = ({
         </div>
 
         <div className="px-8 py-6 max-h-[60vh] overflow-y-auto order-scroll">
-          {sortedOrders.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[200px]">
+              <div className="text-center">
+                <span className="material-symbols-outlined text-5xl text-primary animate-pulse mb-3">
+                  refresh
+                </span>
+                <p className="text-silver-text text-sm">Cargando pedidos...</p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-red-400">error</span>
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            </div>
+          ) : sortedOrders.length === 0 ? (
             <div className="text-center py-12">
               <span className="material-symbols-outlined text-6xl text-silver-text/30 mb-4 block">
                 receipt_long
@@ -154,18 +191,79 @@ export const CompletedOrdersModal = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-silver-text">Total</p>
+                      <p className="text-xs text-silver-text">Items</p>
                       <p className="text-xl font-bold text-white-text">
-                        ${order.total.toFixed(2)}
+                        {order.totalItems}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => onInvoice(order.id)}
-                      className="gold-gradient text-midnight font-bold text-xs uppercase tracking-[0.2em] px-6 py-3 rounded-xl shadow-lg shadow-primary/20 hover:brightness-110 transition-all"
-                    >
-                      Facturar
-                    </button>
+                    <div className="flex flex-col items-end gap-2">
+                      {showNameInput[order.id] && (
+                        <input
+                          type="text"
+                          value={customerNames[order.id] || ''}
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            setCustomerNames((prev) => ({
+                              ...prev,
+                              [order.id]: value,
+                            }));
+                            if (value.trim()) {
+                              setNameErrors((prev) => ({
+                                ...prev,
+                                [order.id]: '',
+                              }));
+                            }
+                          }}
+                          placeholder="Nombre del cliente"
+                          aria-label="Nombre del cliente"
+                          className="w-56 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white-text focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                        />
+                      )}
+                      {(nameErrors[order.id] || invoiceErrorById[order.id]) && (
+                        <p className="text-[10px] text-red-400">
+                          {nameErrors[order.id] || invoiceErrorById[order.id]}
+                        </p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const nameValue = customerNames[order.id]?.trim() || '';
+                          if (!nameValue) {
+                            setShowNameInput((prev) => ({
+                              ...prev,
+                              [order.id]: true,
+                            }));
+                            setNameErrors((prev) => ({
+                              ...prev,
+                              [order.id]: 'Ingresa el nombre del cliente',
+                            }));
+                            return;
+                          }
+
+                          const numericOrderId = Number(order.id);
+                          if (Number.isNaN(numericOrderId)) {
+                            setNameErrors((prev) => ({
+                              ...prev,
+                              [order.id]: 'Order ID inválido',
+                            }));
+                            return;
+                          }
+
+                          try {
+                            await onInvoice(numericOrderId, nameValue);
+                          } catch {
+                            setNameErrors((prev) => ({
+                              ...prev,
+                              [order.id]: 'No se pudo solicitar la factura',
+                            }));
+                          }
+                        }}
+                        disabled={invoiceLoadingById[order.id]}
+                        className="gold-gradient text-midnight font-bold text-xs uppercase tracking-[0.2em] px-6 py-3 rounded-xl shadow-lg shadow-primary/20 hover:brightness-110 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {invoiceLoadingById[order.id] ? 'Enviando...' : 'Facturar'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
