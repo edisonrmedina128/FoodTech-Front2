@@ -109,4 +109,63 @@ describe('useAuth', () => {
     expect(result.current.isLoading).toBe(false)
     expect(result.current.isAuthenticated).toBe(true)
   })
+
+  // ============================================
+  // REGISTER - Tests para registro de usuario
+  // ============================================
+  it('debe hacer registro exitosamente y crear sesión', async () => {
+    const mockToken = 'jwt-token-register-abc123'
+    
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ token: mockToken })
+    })
+
+    const { result } = renderHook(() => useAuth())
+
+    await act(async () => {
+      await result.current.register('test@email.com', 'newuser', 'password123')
+    })
+
+    expect(result.current.isAuthenticated).toBe(true)
+    expect(result.current.token).toBe(mockToken)
+    expect(result.current.error).toBeNull()
+  })
+
+  it('debe manejar error de registro SIN crear sesión', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: () => Promise.resolve({ message: 'El usuario ya existe' })
+    })
+
+    const { result } = renderHook(() => useAuth())
+
+    await act(async () => {
+      await result.current.register('test@email.com', 'existinguser', 'password123')
+    })
+
+    expect(result.current.isAuthenticated).toBe(false)
+    expect(result.current.error).toBe('El usuario ya existe')
+    expect(result.current.token).toBeNull()
+    expect(localStorage.getItem('auth_token')).toBeNull()
+  })
+
+  it('debe manejar estado de loading durante registro', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ token: 'token' })
+    })
+
+    const { result } = renderHook(() => useAuth())
+
+    expect(result.current.isLoading).toBe(false)
+
+    await act(async () => {
+      await result.current.register('test@email.com', 'testuser', 'password')
+    })
+
+    expect(result.current.isLoading).toBe(false)
+    expect(result.current.isAuthenticated).toBe(true)
+  })
 })
