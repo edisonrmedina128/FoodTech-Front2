@@ -126,8 +126,8 @@ export const LoginView = () => {
             </div>
           )}
 
-          {/* Remember me (solo login) */}
-          {!isRegisterMode && (
+          {/* Remember me (solo login, no demo) */}
+          {!isRegisterMode && !demoMode && (
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
@@ -146,13 +146,17 @@ export const LoginView = () => {
           <div className="flex items-center gap-3">
             <input
               type="checkbox"
+              id="demoMode"
               checked={demoMode}
-              onChange={(e) => setDemoMode(e.target.checked)}
+              onChange={(e) => {
+                setDemoMode(e.target.checked)
+                if (e.target.checked) setRememberMe(false)
+              }}
               className="h-4 w-4 accent-primary"
             />
-            <span className="text-sm text-silver-text">
+            <label htmlFor="demoMode" className="text-sm text-silver-text">
               Modo Demo (sin API)
-            </span>
+            </label>
           </div>
 
           {/* Button */}
