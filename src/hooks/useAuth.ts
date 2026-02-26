@@ -6,7 +6,7 @@ interface UseAuthReturn {
   token: string | null
   isLoading: boolean
   error: string | null
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>
   register: (email: string, username: string, password: string) => Promise<void>
   logout: () => void
 }
@@ -27,12 +27,12 @@ export const useAuth = (): UseAuthReturn => {
     setToken(storedToken)
   }, [])
 
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<void> => {
     setIsLoading(true)
     setError(null)
 
     try {
-      await authService.login(email, password)
+      await authService.login(email, password, rememberMe)
       const newToken = authService.getToken()
       setToken(newToken)
       setIsAuthenticated(true)
