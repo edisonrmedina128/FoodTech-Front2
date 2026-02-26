@@ -2,6 +2,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080
 
 export const authService = {
   async login(email: string, password: string): Promise<boolean> {
+    
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
@@ -42,6 +43,35 @@ export const authService = {
 
   isAuthenticated(): boolean {
     return this.getToken() !== null
+  },
+
+  async register(email: string, username: string, password: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, username, password }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || 'Error en el registro')
+      }
+
+      const data = await response.json()
+      localStorage.setItem('auth_token', data.token)
+      return true
+    } catch (error) {
+      if (error instanceof TypeError || error instanceof Error && error.message.includes('Failed to fetch')) {
+        throw new Error('Error de conexión')
+      }
+      if (error instanceof Error) {
+        throw error
+      }
+      throw new Error('Error desconocido')
+    }
   },
   
 }
