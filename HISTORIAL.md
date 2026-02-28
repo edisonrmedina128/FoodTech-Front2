@@ -33,7 +33,7 @@
 ### Componentes Modificados
 - ✅ `src/services/authService.ts` - Método register
 - ✅ `src/services/authService.test.ts` - Tests
-- ✅ `src/hooks/useAuth.ts` - Método register
+- ✅ `src/hocreateoks/useAuth.ts` - Método register
 - ✅ `src/hooks/useAuth.test.ts` - Tests
 - ✅ `src/views/LoginView.tsx` - Toggle UI
 
@@ -47,16 +47,3 @@
 
 ---
 
-## Historias de Usuario (HU-FRONT)
-
-| HU | Título | Estado |
-|----|--------|--------|
-| HU-FRONT-001 | Visualizar disponibilidad de mesas | ⏳ Pendiente |
-| HU-FRONT-002 | Construir pedido por categorías | ⏳ Pendiente |
-| HU-FRONT-003 | Construir pedido con múltiples productos | ⏳ Pendiente |
-| HU-FRONT-004 | Modificar pedido antes de enviarlo | ⏳ Pendiente |
-| HU-FRONT-005 | Enviar pedido completo a cocina | ⏳ Pendiente |
-| HU-FRONT-006 | Monitoreo de estado de órdenes | ⏳ Pendiente |
-| HU-FRONT-007 | Visualizar tareas por estación | ⏳ Pendiente |
-| HU-FRONT-008 | Filtrar tareas por estado | ⏳ Pendiente |
-| HU-FRONT-009 | Actualización automática de estados | ⏳ Pendiente |

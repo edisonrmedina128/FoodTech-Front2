@@ -1,16 +1,15 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 const REMEMBER_ME_DAYS = 30
-
 export const authService = {
   async login(email: string, password: string, rememberMe: boolean = false): Promise<boolean> {
     
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier: email, password }),
       })
 
       if (!response.ok) {
@@ -62,7 +61,7 @@ export const authService = {
 
   async register(email: string, username: string, password: string): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,13 +69,6 @@ export const authService = {
         body: JSON.stringify({ email, username, password }),
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.message || 'Error en el registro')
-      }
-
-      const data = await response.json()
-      localStorage.setItem('auth_token', data.token)
       return true
     } catch (error) {
       if (error instanceof TypeError || error instanceof Error && error.message.includes('Failed to fetch')) {

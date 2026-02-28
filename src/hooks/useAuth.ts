@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { authService } from '../services/authService'
-
+import { redirect } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 interface UseAuthReturn {
   isAuthenticated: boolean
   token: string | null
@@ -20,7 +21,7 @@ export const useAuth = (): UseAuthReturn => {
   )
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
-
+  const navigate = useNavigate();
   useEffect(() => {
     const storedToken = authService.getToken()
     setIsAuthenticated(storedToken !== null)
@@ -28,6 +29,7 @@ export const useAuth = (): UseAuthReturn => {
   }, [])
 
   const login = async (email: string, password: string, rememberMe: boolean = false): Promise<void> => {
+    debugger;
     setIsLoading(true)
     setError(null)
 
@@ -56,12 +58,10 @@ export const useAuth = (): UseAuthReturn => {
   const register = async (email: string, username: string, password: string): Promise<void> => {
     setIsLoading(true)
     setError(null)
-
     try {
-      await authService.register(email, username, password)
-      const newToken = authService.getToken()
-      setToken(newToken)
-      setIsAuthenticated(true)
+      debugger;
+      await authService.register(email, username, password);
+      navigate("/")
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido'
       setError(message)
