@@ -40,6 +40,7 @@ Este documento define la estrategia de QA para el proyecto FoodTech, diferencian
 ## 2. Pruebas Implementadas en FoodTech
 
 ### Tests de VERIFICACIÓN (¿Código funciona?)
+> Pruebas unitarias que verifican que la sintaxis y lógica técnica funciona correctamente.
 
 | Archivo | Test | Qué verifica |
 |---------|------|--------------|
@@ -48,6 +49,33 @@ Este documento define la estrategia de QA para el proyecto FoodTech, diferencian
 | `03-auth-login-error-red.test.ts` | Login con error de red | Que maneja errores de red |
 | `04-auth-login-remember-false.test.ts` | Login sin rememberMe | Que no guarda expiry |
 | `05-auth-login-remember-true.test.ts` | Login con rememberMe | Que guarda expiry |
+| `06-auth-logout-token.test.ts` | Logout remueve token | Que limpia localStorage |
+| `07-auth-getToken.test.ts` | getToken retorna token | Que retorna valor almacenado |
+| `08-auth-getToken-null.test.ts` | getToken sin token | Que retorna null |
+| `09-auth-isAuthenticated-true.test.ts` | Con token retorna true | Que verifica correctamente |
+| `10-auth-isAuthenticated-false.test.ts` | Sin token retorna false | Que maneja ausencia |
+| `16-useAuth-inicial.test.ts` | Hook sin auth | Que inicializa correcto |
+| `17-useAuth-inicial-token.test.ts` | Hook con token | Que detecta sesión |
+| `18-useAuth-login.test.ts` | Login en hook | Que actualiza estado |
+| `25-LoginView-formulario.test.tsx` | Render formulario | Que renderiza UI |
+| `31-LoginView-email.test.ts` | Input email | Que acepta texto |
+| `32-LoginView-password.test.ts` | Input password | Que acepta texto |
+
+### Tests de VALIDACIÓN (¿Negocio protegido?)
+> Pruebas que validan las reglas críticas de negocio y protección del sistema.
+
+| Archivo | Test | Qué valida (Regla de Negocio) |
+|---------|------|------------|
+| `44-validacion-negocio.test.ts` | Token expirado no permite acceso | **Seguridad: Sesión válida** |
+| `44-validacion-negocio.test.ts` | Logout limpia token | **Seguridad: Cerrar sesión** |
+| `44-validacion-negocio.test.ts` | getToken retorna null sin token | **Seguridad: Sin acceso** |
+| `44-validacion-negocio.test.ts` | isAuthenticated sin token | **Seguridad: Estado protegido** |
+| `44-validacion-negocio.test.ts` | Login exitoso guarda token | **Regla: Persistencia de sesión** |
+| `44-validacion-negocio.test.ts` | Login con error NO guarda token | **Seguridad: Acceso denegado** |
+| `44-validacion-negocio.test.ts` | RememberMe guarda expiry | **Regla: Sesión recordada** |
+| `44-validacion-negocio.test.ts` | Sin rememberMe NO guarda expiry | **Regla: Sesión temporal** |
+| `44-validacion-negocio.test.ts` | isAuthenticated con token válido | **Seguridad: Acceso permitido** |
+| `44-validacion-negocio.test.ts` | getToken retorna token guardado | **Regla: Recuperar sesión** |
 | `06-auth-logout-token.test.ts` | Logout remueve token | Que limpia localStorage |
 | `07-auth-getToken.test.ts` | getToken retorna token | Que retorna valor almacenado |
 | `08-auth-getToken-null.test.ts` | getToken sin token | Que retorna null |
@@ -122,16 +150,18 @@ describe('login', () => {
 | `src/tests/auth/01-15-*.test.ts` | 15 | Unit | 10 Verificar, 5 Validar |
 | `src/tests/auth/16-24-*.test.ts` | 9 | Unit/Hook | 5 Verificar, 4 Validar |
 | `src/tests/auth/25-41-*.test.tsx` | 17 | Component | 12 Verificar, 5 Validar |
+| `src/tests/auth/43-*.test.ts` | 3 | Unit | 3 Verificar |
+| `src/tests/auth/44-*.test.ts` | 10 | Unit | 10 Validar |
 | `orderCalculator.test.ts` | 6 | Unit | 6 Verificar |
 | `useOrder.test.ts` | 1 | Unit/Hook | 1 Verificar |
 
-**Total: 100 tests (100% verdes)**
+**Total: 115 tests (100% verdes)**
 
 ### Coverage Actual
-- **Statements**: 96.44%
-- **Branches**: 80%
+- **authService**: 97.36% statements, 88.88% branches
+- **Statements**: 97.36%
+- **Branches**: 88.88%
 - **Functions**: 100%
-- **Lines**: 96.31%
 
 ---
 
