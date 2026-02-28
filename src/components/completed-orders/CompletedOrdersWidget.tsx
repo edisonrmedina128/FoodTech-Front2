@@ -52,6 +52,8 @@ export const CompletedOrdersWidget = () => {
       setToastMessage('');
       toastTimeoutRef.current = null;
     }, 4000);
+
+    return remainingCount;
   };
 
   return (
