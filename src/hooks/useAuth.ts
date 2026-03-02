@@ -57,7 +57,8 @@ export const useAuth = (): UseAuthReturn => {
     setError(null)
     try {
       await authService.register(email, username, password);
-      navigate("/")
+      await authService.login(email,password,false);
+      navigate("/mesero")
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error desconocido'
       setError(message)

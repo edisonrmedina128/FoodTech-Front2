@@ -1,266 +1,594 @@
 # Testing Strategy - FoodTech
 
-## Resumen Ejecutivo
+---
 
-Este documento define la estrategia de QA para el proyecto FoodTech, diferenciando entre pruebas de **verificación** y **validación**.
+# PARTE 1: TEORÍA
+
+## 1.1 TDD (Red - Green - Refactor)
+
+**¿Qué es TDD?**
+Desarrollo dirigido por pruebas: escribimos el test primero (RED), luego el código mínimo para pasar (GREEN), luego refactorizamos.
+
+| Fase | Qué hacemos | Resultado |
+|------|-------------|-----------|
+| **RED** | Escribimos el test antes del código | Test falla |
+| **GREEN** | Escribimos código mínimo para pasar | Test pasa |
+| **REFACTOR** | Mejoramos código sin romper tests | Tests siguen pasando |
+
+**Ejemplo:**
+1. RED: Escribo test "login exitoso debe guardar token" → falla (no existe código)
+2. GREEN: Escribo código mínimo para guardar token → test pasa
+3. REFACTOR: Mejoro el código manteniendo funcionalidad
 
 ---
 
-## 1. Tipos de Pruebas
+## 1.2 ¿Qué es Verificar?
 
-### 🧪 Verificar vs Validar
-
-| Concepto | Descripción | Ejemplo |
-|----------|-------------|---------|
-| **Verificar** | "¿Estamos construyendo el producto correctamente?" | ¿La función suma correctamente? |
-| **Validar** | "¿Estamos construyendo el producto correcto?" | ¿El saldo negativo es imposible? |
-
-### 🧪 Pruebas de Verificación (Testing)
-> "¿Estamos construyendo el producto correctamente?"
-> Verifican que el código funciona como se diseñó.
-
-| Tipo | Descripción | Herramienta |
-|------|-------------|--------------|
-| Unit Tests | Pruebas de funciones y hooks individuales | Vitest |
-| Integration Tests | Pruebas de integración entre servicios | Vitest + Testing Library |
-| Component Tests | Pruebas de componentes React | Testing Library |
-
-### ✅ Pruebas de Validación (QA)
-> "¿Estamos construyendo el producto correcto?"
-> Verifican que el sistema cumple con los requisitos del usuario.
-
-| Tipo | Descripción | Método |
-|------|-------------|--------|
-| E2E | Flujos completos de usuario | Manual |
-| UAT | Pruebas con usuarios reales | Manual |
-| Performance | Tiempos de carga y respuesta | Lighthouse |
+- **Fase TDD:** GREEN - nos dice que el código funciona
+- **Pregunta:** ¿El código funciona correctamente?
+- **Ejemplos:** ¿La función retorna el valor esperado? ¿El endpoint se llama bien?
 
 ---
 
-## 2. Pruebas Implementadas en FoodTech
+## 1.3 ¿Qué es Validar?
 
-### Tests de VERIFICACIÓN (¿Código funciona?)
-> Pruebas unitarias que verifican que la sintaxis y lógica técnica funciona correctamente.
-
-| Archivo | Test | Qué verifica |
-|---------|------|--------------|
-| `01-auth-login-exitoso.test.ts` | Login exitoso retorna true | Que la función retorna valor esperado |
-| `02-auth-login-invalidas.test.ts` | Login con credenciales inválidas | Que lanza error correcto |
-| `03-auth-login-error-red.test.ts` | Login con error de red | Que maneja errores de red |
-| `04-auth-login-remember-false.test.ts` | Login sin rememberMe | Que no guarda expiry |
-| `05-auth-login-remember-true.test.ts` | Login con rememberMe | Que guarda expiry |
-| `06-auth-logout-token.test.ts` | Logout remueve token | Que limpia localStorage |
-| `07-auth-getToken.test.ts` | getToken retorna token | Que retorna valor almacenado |
-| `08-auth-getToken-null.test.ts` | getToken sin token | Que retorna null |
-| `09-auth-isAuthenticated-true.test.ts` | Con token retorna true | Que verifica correctamente |
-| `10-auth-isAuthenticated-false.test.ts` | Sin token retorna false | Que maneja ausencia |
-| `16-useAuth-inicial.test.ts` | Hook sin auth | Que inicializa correcto |
-| `17-useAuth-inicial-token.test.ts` | Hook con token | Que detecta sesión |
-| `18-useAuth-login.test.ts` | Login en hook | Que actualiza estado |
-| `25-LoginView-formulario.test.tsx` | Render formulario | Que renderiza UI |
-| `31-LoginView-email.test.ts` | Input email | Que acepta texto |
-| `32-LoginView-password.test.ts` | Input password | Que acepta texto |
-
-### Tests de VALIDACIÓN (¿Negocio protegido?)
-> Pruebas que validan las reglas críticas de negocio y protección del sistema.
-
-| Archivo | Test | Qué valida (Regla de Negocio) |
-|---------|------|------------|
-| `44-validacion-negocio.test.ts` | Token expirado no permite acceso | **Seguridad: Sesión válida** |
-| `44-validacion-negocio.test.ts` | Logout limpia token | **Seguridad: Cerrar sesión** |
-| `44-validacion-negocio.test.ts` | getToken retorna null sin token | **Seguridad: Sin acceso** |
-| `44-validacion-negocio.test.ts` | isAuthenticated sin token | **Seguridad: Estado protegido** |
-| `44-validacion-negocio.test.ts` | Login exitoso guarda token | **Regla: Persistencia de sesión** |
-| `44-validacion-negocio.test.ts` | Login con error NO guarda token | **Seguridad: Acceso denegado** |
-| `44-validacion-negocio.test.ts` | RememberMe guarda expiry | **Regla: Sesión recordada** |
-| `44-validacion-negocio.test.ts` | Sin rememberMe NO guarda expiry | **Regla: Sesión temporal** |
-| `44-validacion-negocio.test.ts` | isAuthenticated con token válido | **Seguridad: Acceso permitido** |
-| `44-validacion-negocio.test.ts` | getToken retorna token guardado | **Regla: Recuperar sesión** |
-| `06-auth-logout-token.test.ts` | Logout remueve token | Que limpia localStorage |
-| `07-auth-getToken.test.ts` | getToken retorna token | Que retorna valor almacenado |
-| `08-auth-getToken-null.test.ts` | getToken sin token | Que retorna null |
-| `09-auth-isAuthenticated-true.test.ts` | Con token retorna true | Que verifica correctamente |
-| `10-auth-isAuthenticated-false.test.ts` | Sin token retorna false | Que maneja ausencia |
-| `11-auth-isAuthenticated-expirado.test.ts` | Token expirado | Que valida expiración |
-| `12-auth-register-exitoso.test.ts` | Register exitoso | Que crea usuario |
-| `16-useAuth-inicial.test.ts` | Hook sin auth | Que inicializa correcto |
-| `17-useAuth-inicial-token.test.ts` | Hook con token | Que detecta sesión |
-| `18-useAuth-login.test.ts` | Login en hook | Que actualiza estado |
-| `25-LoginView-formulario.test.tsx` | Render formulario | Que renderiza UI |
-| `31-LoginView-email.test.ts` | Input email | Que acepta texto |
-| `32-LoginView-password.test.ts` | Input password | Que acepta texto |
-
-### Tests de VALIDACIÓN (¿Negocio protegido?)
-
-| Archivo | Test | Qué valida |
-|---------|------|------------|
-| `01-auth-login-exitoso.test.ts` | Token se guarda en localStorage | **Seguridad: Sesión persistida** |
-| `02-auth-login-invalidas.test.ts` | Error con credenciales inválidas | **Seguridad: Acceso denegado** |
-| `06-auth-logout-token.test.ts` | Logout limpia sesión | **Seguridad: Cerrar sesión** |
-| `11-auth-isAuthenticated-expirado.test.ts` | Token expirado no permite acceso | **Seguridad: Sesión válida** |
-| `18-useAuth-login.test.ts` | Login actualiza estado | **Regla: Estado consistente** |
-| `19-useAuth-login-error.test.ts` | Error no crea sesión | **Seguridad: Estado limpio** |
-| `21-useAuth-logout.test.ts` | Hook logout | **Regla: Limpiar estado** |
-| `34-LoginView-submit-login.test.tsx` | Submit llama login | **Regla: Flujo correcto** |
-| `37-LoginView-demo.test.tsx` | Demo mode funciona | **Regla: Acceso demo** |
-| `40-LoginView-error.test.tsx` | Muestra errores | **UX: Feedback usuario** |
+- **Fase RED (al inicio) + GREEN:** Protegemos el negocio
+- **Pregunta:** ¿El negocio está protegido?
+- **Ejemplos:** ¿Token expirado = sin acceso? ¿Credenciales wrong = no crea sesión?
 
 ---
 
-## 3. Human Check - Defensa de Tests
+## 1.4 ¿Qué es QA vs Testing?
 
-El estudiante debe poder explicar cada test generado por IA:
+| Concepto | Descripción |
+|----------|-------------|
+| **Testing** | Ejecutar scripts para verificar que el código funciona. Pregunta: "¿pasa o falla?" |
+| **QA (Quality Assurance)** | Estrategia integral para garantizar calidad. Pregunta: "¿qué protegemos?" |
 
-### Ejemplo de Explicación (authService.test.ts)
+---
 
+## 1.5 Workflow TDD (Basado en ai.workflow.md)
+
+**¿Cómo trabajamos?**
+Cada feature sigue un proceso estructurado:
+
+| Paso | Fase | Acción | Herramienta | Resultado |
+|------|------|--------|-------------|-----------|
+| 1 | - | Load Context | glob, read files | Estructura del proyecto |
+| 2 | - | Analyze Requirements | read tests, models, services | Entender la HU |
+| 3 | **RED** | Write Tests First | write test file | Tests fallan ✗ |
+| 4 | **RED** | Run Tests Verify | npm test -- --run | Verificar fallan ✗ |
+| 5 | **GREEN** | Implement Feature | write implementation | Código mínimo |
+| 6 | **GREEN** | Run Tests Verify | npm test -- --run | Tests pasan ✓ |
+| 7 | **REFACTOR** | Improve Code | edit code | Código mejor |
+| 8 | - | Final Verification | lint, typecheck, test | Todo pasa ✓ |
+
+### Flujo TDD Resumido
+
+```
+1. Write Test → FAIL (red) ✗
+2. Implement Code → PASS (green) ✓
+3. Refactor → PASS (green) ✓
+4. Lint + Typecheck → ✓
+```
+
+### Relación con Historias de Usuario
+
+Cada HU sigue este workflow:
+
+```
+HU → Analyze Requirements → RED (tests) → GREEN (código) → Refactor → Historial.md
+```
+
+**Ejemplo (Registro de Usuario):**
+1. Leer HU-FRONT-002
+2. Escribir tests de registro (RED) → 5 tests
+3. Implementar authService.register (GREEN)
+4. Escribir tests de useAuth.register (RED)
+5. Implementar useAuth.register (GREEN)
+6. Actualizar LoginView toggle
+7. Actualizar HISTORIAL.md con commits
+
+---
+
+# PARTE 2: AUTH SERVICE (Tests 01-15)
+
+## 2.1 Tests que Verifican (GREEN)
+
+### Test 01: 01-auth-login-exitoso.test.ts
+
+**TDD:** GREEN - Primero escribimos el test, luego el código
+
+**Qué hace:**
+Este test verifica que cuando un usuario hace login con credenciales correctas, el sistema retorna true y guarda el token en localStorage.
+
+**Código:**
 ```typescript
-// TEST: "debe hacer login exitoso y guardar token en localStorage"
-describe('login', () => {
-  it('debe hacer login exitoso y guardar token en localStorage', async () => {
-    // 1. MOCK: Simulo API que retorna token
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ token: mockToken })
-    })
-
-    // 2. ACT: Llamo al servicio real
-    const result = await authService.login('test@restaurant.com', 'password123')
-
-    // 3. ASSERTIONS:
-    // Verifica: El login retorna true (verificación técnica)
-    expect(result).toBe(true)
-    
-    // Valida: El token se guardó en localStorage (regla de negocio: persistencia de sesión)
-    expect(localStorage.getItem('auth_token')).toBe(mockToken)
+it('debe hacer login exitoso y guardar token en localStorage', async () => {
+  global.fetch = vi.fn().mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve({ token: 'fake-jwt-token-12345' })
   })
+  const { authService } = await import('../../services/authService')
+  const result = await authService.login('test@restaurant.com', 'password123')
+  expect(result).toBe(true)
+  expect(localStorage.getItem('auth_token')).toBe('fake-jwt-token-12345')
 })
 ```
 
-### ¿Por qué se mockea `fetch`?
-- **Qué es**: Función nativa del navegador para HTTP requests
-- **Por qué**: Para no depender de un servidor real en tests
-- **Qué pasa si no se mockea**: Los tests fallarían si no hay API corriendo
+**Mocks:**
+- `global.fetch` - Simula respuesta exitosa del servidor
+
+**Texto para presentación:**
+> "Este test verifica el flujo feliz: login con credenciales correctas. Mockeo fetch para simular que el servidor retorna un token, y verifico que ese token se guarde en localStorage."
 
 ---
 
-## 4. Cobertura de Pruebas Actual
+### Test 04: 04-auth-login-remember-false.test.ts
 
-| Archivo | Tests | Tipo | Clasificación |
-|---------|-------|------|---------------|
-| `src/tests/auth/01-15-*.test.ts` | 15 | Unit | 10 Verificar, 5 Validar |
-| `src/tests/auth/16-24-*.test.ts` | 9 | Unit/Hook | 5 Verificar, 4 Validar |
-| `src/tests/auth/25-41-*.test.tsx` | 17 | Component | 12 Verificar, 5 Validar |
-| `src/tests/auth/43-*.test.ts` | 3 | Unit | 3 Verificar |
-| `src/tests/auth/44-*.test.ts` | 10 | Unit | 10 Validar |
-| `orderCalculator.test.ts` | 6 | Unit | 6 Verificar |
-| `useOrder.test.ts` | 1 | Unit/Hook | 1 Verificar |
+**Qué hace:**
+Verifica que cuando el usuario NO marca "recordarme", el token se guarda sin fecha de expiración.
 
-**Total: 115 tests (100% verdes)**
-
-### Coverage Actual
-- **authService**: 97.36% statements, 88.88% branches
-- **Statements**: 97.36%
-- **Branches**: 88.88%
-- **Functions**: 100%
+**Texto para presentación:**
+> "Este test verifica que cuando el usuario NO marca 'recordarme', el token se guarda sin fecha de expiración. Es decir, la sesión dura solo mientras el navegador está abierto."
 
 ---
 
-## 5. Estrategia TDD Aplicada
+### Test 05: 05-auth-login-remember-true.test.ts
 
+**Qué hace:**
+Verifica que cuando el usuario marca "recordarme", el token se guarda CON fecha de expiración.
+
+**Texto para presentación:**
+> "Este test verifica lo contrario: cuando el usuario marca 'recordarme', el sistema guarda también la fecha de expiración del token para mantener la sesión activa."
+
+---
+
+### Test 06: 06-auth-logout-token.test.ts
+
+**Qué hace:**
+Verifica que la función logout() remueve completamente el token de localStorage.
+
+**Texto para presentación:**
+> "Este test verifica que el logout funciona: cuando el usuario cierra sesión, el token debe desaparecer del almacenamiento. Sin mocks, pruebo la función directamente."
+
+---
+
+### Test 07: 07-auth-getToken.test.ts
+
+**Qué hace:**
+Verifica que getToken() retorna exactamente el token guardado en localStorage.
+
+**Texto para presentación:**
+> "Este test verifica que getToken funciona correctamente: retorna exactamente lo que está guardado. Sin mocks, es una verificación directa de la lógica."
+
+---
+
+### Test 09: 09-auth-isAuthenticated-true.test.ts
+
+**Qué hace:**
+Verifica que con token válido, isAuthenticated() retorna true.
+
+**Texto para presentación:**
+> "Este test verifica que isAuthenticated retorna true cuando hay un token. Sin mocks, pruebo que la función detecta correctamente un token válido."
+
+---
+
+### Test 12: 12-auth-register-exitoso.test.ts
+
+**Qué hace:**
+Verifica que el registro retorna true cuando el servidor responde exitosamente.
+
+---
+
+### Test 15: 15-auth-register-request.test.ts
+
+**Qué hace:**
+Verifica que el registro llama al endpoint correcto '/auth/register' con método POST y datos correctos.
+
+**Texto para presentación:**
+> "Este test verifica la ARQUITECTURA: que el registro llama al endpoint correcto con los datos correctos."
+
+---
+
+## 2.2 Tests que Validan (RED → GREEN)
+
+### Test 02: 02-auth-login-invalidas.test.ts
+
+**TDD:** RED → GREEN - Primero escribimos el test de validación
+
+**Qué hace:**
+Valida que credenciales inválidas (email/password wrong) lanzan error "Credenciales inválidas".
+
+**Código:**
+```typescript
+it('debe lanzar error cuando credenciales son inválidas', async () => {
+  global.fetch = vi.fn().mockResolvedValue({
+    ok: false,
+    status: 401
+  })
+  const { authService } = await import('../../services/authService')
+  await expect(
+    authService.login('wrong@email.com', 'wrongpass')
+  ).rejects.toThrow('Credenciales inválidas')
+})
 ```
-1. RED    → Escribir test que falla
-2. GREEN  → Implementar código mínimo para pasar
-3. REFACTOR → Melhorar código manteniendo tests
+
+**Mocks:**
+- `global.fetch` - Simula respuesta 401 (no autorizado)
+
+**Texto para presentación:**
+> "Este test valida la seguridad: si alguien intenta acceder con credenciales incorrectas, el sistema debe rechazarle. Mockeo fetch con status 401 y verifico que lance el error 'Credenciales inválidas'."
+
+---
+
+### Test 03: 03-auth-login-error-red.test.ts
+
+**Qué hace:**
+Valida que error de red lanza "Error de conexión".
+
+**Texto para presentación:**
+> "Este test valida el manejo de errores de red. Si el servidor no responde, el usuario debe ver 'Error de conexión', no un crash."
+
+---
+
+### Test 08: 08-auth-getToken-null.test.ts
+
+**Qué hace:**
+Valida que sin token, getToken() retorna null.
+
+**Texto para presentación:**
+> "Este test valida el caso negativo: si no hay token, getToken debe retornar null, no vacío ni undefined."
+
+---
+
+### Test 10: 10-auth-isAuthenticated-false.test.ts
+
+**Qué hace:**
+Valida que sin token, isAuthenticated() retorna false.
+
+**Texto para presentación:**
+> "Este test valida la regla de seguridad más básica: sin token, el usuario NO está autenticado."
+
+---
+
+### Test 11: 11-auth-isAuthenticated-expirado.test.ts ⭐
+
+**TDD:** RED → GREEN - Test de validación CRÍTICO
+
+**Qué hace:**
+Valida que token expirado (fecha pasada) retorna false. Es como "saldo negativo" en seguridad.
+
+**Código:**
+```typescript
+it('debe retornar false cuando el token está expirado', async () => {
+  const expiredDate = Date.now() - 1000
+  localStorage.setItem('auth_token', 'expired-token')
+  localStorage.setItem('auth_token_expiry', expiredDate.toString())
+  const { authService } = await import('../../services/authService')
+  expect(authService.isAuthenticated()).toBe(false)
+})
 ```
 
-### Flujo de Trabajo
+**Mocks:**
+- Ninguno - usa localStorage real
 
-1. **Analizar Requisitos** → Entender qué necesita el usuario
-2. **Escribir Test Primero** → Crear test en archivo `.test.ts`
-3. **Verificar que Falla** → Ejecutar `npm test` → debe fallar
-4. **Implementar** → Escribir código mínimo
-5. **Verificar que Pasa** → Ejecutar `npm test` → debe pasar
-6. **Refactorizar** → Melhorar si es necesario
-7. **Verificación Final** → Lint + Typecheck + Tests
+**Texto para presentación:**
+> "Este test valida la regla de negocio más importante: token expirado NO permite acceso. Es como el 'saldo negativo' en seguridad bancaria. Creo un token con fecha pasada y verifico que isAuthenticated retorne false."
 
 ---
 
-## 4. Reglas de Testing
+### Test 13: 13-auth-register-error.test.ts
 
-### Unit Tests (Servicios)
-- ✅ Probar casos happy path
-- ✅ Probar casos de error
-- ✅ Probar edge cases
-- ❌ No probar implementación interna (caja negra)
-
-### Hook Tests
-- ✅ Probar estados iniciales
-- ✅ Probar transiciones de estado
-- ✅ Probar efectos secundarios
-
-### Component Tests
-- ✅ Probar renderizado
-- ✅ Probar interacciones del usuario
-- ✅ Probar casos de error
+**Qué hace:**
+Valida que error 400 en registro se maneja.
 
 ---
 
-## 5. Commands de Ejecución
+### Test 14: 14-auth-register-error-red.test.ts
 
-```bash
-# Ejecutar todos los tests
-npm test
+**Qué hace:**
+Valida que error de red en registro lanza "Error de conexión".
 
-# Tests en modo watch
-npm test
+---
 
-# Tests con coverage
-npm test -- --coverage
+# PARTE 3: USE AUTH (Tests 16-24)
 
-# Solo archivos específicos
-npm test -- --run src/services/authService.test.ts
+## 3.1 Tests que Verifican (GREEN)
 
-# Lint
-npm run lint
+### Test 16: 16-useAuth-inicial.test.ts
 
-# Typecheck
-npm run build
+**Qué hace:**
+Verifica que el hook useAuth inicia con isAuthenticated=false, token=null, isLoading=false.
 
-# Verificación completa
-npm run lint && npm test -- --run && npm run build
+**Mocks:**
+- `react-router-dom` - Mock de useNavigate
+
+**Texto para presentación:**
+> "Este test verifica el estado inicial del hook useAuth: cuando no hay token, debe iniciar con isAuthenticated=false, token=null, y isLoading=false."
+
+---
+
+### Test 17: 17-useAuth-inicial-token.test.ts
+
+**Qué hace:**
+Verifica que el hook detecta token existente al iniciar y restaura sesión.
+
+---
+
+### Test 18: 18-useAuth-login.test.ts ⭐
+
+**Qué hace:**
+Verifica que el hook hace login y actualiza el estado: isAuthenticated=true, token, error=null.
+
+**Mocks:**
+- `global.fetch` - Simula servidor
+- `react-router-dom` - Mock de useNavigate
+
+**Código:**
+```typescript
+it('debe hacer login exitosamente y crear sesión', async () => {
+  global.fetch = vi.fn().mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve({ token: 'jwt-token-abc123' })
+  })
+  const { result } = renderHook(() => useAuth())
+  await act(async () => {
+    await result.current.login('test@restaurant.com', 'password123')
+  })
+  expect(result.current.isAuthenticated).toBe(true)
+  expect(result.current.token).toBe('jwt-token-abc123')
+  expect(result.current.error).toBeNull()
+})
 ```
 
----
-
-## 6. Criterios de Aceptación
-
-| Métrica | Objetivo | Actual |
-|---------|----------|--------|
-| Tests Passing | ≥ 90% | 100% |
-| Coverage | ≥ 70% | - |
-| Lint Errors | 0 | 0 |
-| Typecheck Errors | 0 | 0 |
+**Texto para presentación:**
+> "Este test verifica el flujo completo de login en el hook. Uso dos mocks: fetch para simular el servidor, y react-router-dom para evitar navegación real. Así aíslo solo la lógica del hook."
 
 ---
 
-## 7. Próximos Pasos
+### Test 20: 20-useAuth-login-loading.test.ts
 
-- [ ] Agregar más tests de componentes
-- [ ] Configurar coverage report
-- [ ] Agregar tests E2E con Playwright
-- [ ] Integrar en CI/CD pipeline
+**Qué hace:**
+Verifica que el estado isLoading cambia durante login.
 
 ---
 
-## 6. Human Check - Defensa de Tests
+### Test 21: 21-useAuth-logout.test.ts
 
-### EJEMPLOS PARA LA EVALUACIÓN
+**Qué hace:**
+Verifica que logout limpia estado interno y localStorage.
 
-#### 1. Test que VERIFICA la Arquitectura (llamada a puerto)
+---
 
-**Archivo:** `src/tests/auth/45-verificar-arquitectura.test.ts`
-**Test:** "Login hace fetch al endpoint correcto"
+### Test 22: 22-useAuth-register.test.ts
 
+**Qué hace:**
+Verifica que el hook puede hacer registro.
+
+---
+
+### Test 24: 24-useAuth-register-loading.test.ts
+
+**Qué hace:**
+Verifica estado loading durante registro.
+
+---
+
+## 3.2 Tests que Validan (RED → GREEN)
+
+### Test 19: 19-useAuth-login-error.test.ts ⭐
+
+**TDD:** RED → GREEN - Test de validación CRÍTICO
+
+**Qué hace:**
+Valida que error de login NO crea sesión: isAuthenticated=false, error="Credenciales inválidas", token=null, NO guarda en localStorage.
+
+**Mocks:**
+- `global.fetch` - Simula 401
+- `react-router-dom` - Mock de useNavigate
+
+**Texto para presentación:**
+> "Este test valida la seguridad en el hook: si el login falla, el hook debe manejar el error, NO crear sesión, y mostrar el mensaje correcto. Es la validación más importante para el hook."
+
+---
+
+### Test 23: 23-useAuth-register-error.test.ts
+
+**Qué hace:**
+Valida que error de red en registro se maneja correctamente.
+
+---
+
+# PARTE 4: LOGIN VIEW (Tests 25-41)
+
+## 4.1 Tests que Verifican (GREEN) - UI/Formulario
+
+### Test 25: 25-LoginView-formulario.test.tsx
+
+**Qué hace:**
+Verifica que el formulario renderiza y existe el botón "Iniciar sesión".
+
+**Mocks:**
+- `useAuth` - Mock con valores por defecto
+
+**Texto para presentación:**
+> "Este test verifica que el componente se renderiza correctamente y muestra el botón de login."
+
+---
+
+### Test 26: 26-LoginView-titulo.test.tsx
+
+**Qué hace:**
+Verifica que el título "FoodTech Login" aparece.
+
+---
+
+### Test 27: 27-LoginView-enlace.test.tsx
+
+**Qué hace:**
+Verifica que existe el botón para cambiar a modo registro.
+
+---
+
+### Test 28: 28-LoginView-modo-registro.test.tsx
+
+**Qué hace:**
+Verifica que al hacer click en "Regístrate", cambia a modo registro con título "FoodTech Registro".
+
+---
+
+### Test 29: 29-LoginView-volver-login.test.tsx
+
+**Qué hace:**
+Verifica que desde modo registro se puede volver a modo login.
+
+---
+
+### Test 30: 30-LoginView-limpiar-campos.test.tsx
+
+**Qué hace:**
+Verifica que al cambiar de modo, los campos se limpian.
+
+**Texto para presentación:**
+> "Este test verifica que cuando el usuario cambia de modo (login a registro), los campos se limpian por seguridad y para evitar datos mezclados."
+
+---
+
+### Test 31: 31-LoginView-email.test.tsx
+
+**Qué hace:**
+Verifica que el campo email acepta texto.
+
+---
+
+### Test 32: 32-LoginView-password.test.tsx
+
+**Qué hace:**
+Verifica que el campo password acepta texto.
+
+---
+
+### Test 33: 33-LoginView-username.test.tsx
+
+**Qué hace:**
+Verifica que en modo registro aparece el campo username.
+
+---
+
+### Test 34: 34-LoginView-submit-login.test.tsx
+
+**Qué hace:**
+Verifica que al hacer submit en login, se llama a login del hook con email, password, rememberMe.
+
+**Mocks:**
+- `useAuth` - Mock con login controlable
+
+**Texto para presentación:**
+> "Este test verifica el flujo principal: el usuario completa el formulario y hace submit. Verifico que se llame al hook con los parámetros correctos."
+
+---
+
+### Test 35: 35-LoginView-rememberme.test.tsx
+
+**Qué hace:**
+Verifica que cuando el checkbox rememberMe está marcado, se pasa true al hook.
+
+---
+
+### Test 36: 36-LoginView-submit-register.test.tsx
+
+**Qué hace:**
+Verifica que en modo registro, el submit llama a register con email, username, password.
+
+---
+
+### Test 38: 38-LoginView-boton.test.tsx
+
+**Qué hace:**
+Verifica que el botón muestra "Iniciar sesión" cuando no está cargando.
+
+---
+
+### Test 39: 39-LoginView-registrarse.test.tsx
+
+**Qué hace:**
+Verifica que en modo registro el botón dice "Registrarse".
+
+---
+
+## 4.2 Tests que Validan (RED → GREEN) - Negocio
+
+### Test 37: 37-LoginView-demo.test.tsx
+
+**TDD:** RED → GREEN
+
+**Qué hace:**
+Valida que el modo demo (entrar sin cuenta) funciona correctamente guardando un token especial.
+
+**Texto para presentación:**
+> "Este test valida el modo demo: permite entrada rápida sin autenticación real."
+
+---
+
+### Test 40: 40-LoginView-error.test.tsx
+
+**TDD:** RED → GREEN
+
+**Qué hace:**
+Valida que cuando hay error del hook, se muestra en pantalla.
+
+**Mocks:**
+- `useAuth` - Mock con error
+
+**Texto para presentación:**
+> "Este test valida que el usuario ve el mensaje de error cuando la autenticación falla."
+
+---
+
+### Test 41: 41-LoginView-loading.test.tsx
+
+**TDD:** RED → GREEN
+
+**Qué hace:**
+Valida que cuando está cargando, muestra "Iniciando sesión..." en lugar del botón.
+
+**Mocks:**
+- `useAuth` - Mock con isLoading=true
+
+**Texto para presentación:**
+> "Este test valida el feedback de carga: mientras el servidor responde, el usuario ve 'Iniciando sesión...'."
+
+---
+
+# PARTE 5: TESTS ESPECIALES (43-48)
+
+## Test 43: 43-authService-coverage.test.ts
+
+**TDD:** GREEN
+
+**Qué hace:**
+Tests adicionales para aumentar cobertura: error 500, errores desconocidos.
+
+---
+
+## Test 44: 44-validacion-negocio.test.ts
+
+**TDD:** RED → GREEN
+
+**Qué hace:**
+Agrupación de validaciones de negocio: token expirado, logout limpia, error no guarda token, etc.
+
+---
+
+## Test 45: 45-verificar-arquitectura.test.ts ⭐
+
+**TDD:** GREEN
+
+**Qué hace:**
+Verifica que login llama al endpoint '/api/auth/login' con método POST.
+
+**Código:**
 ```typescript
 it('VERIFICAR: Login hace fetch al endpoint correcto', async () => {
   const mockFetch = vi.fn().mockResolvedValue({
@@ -268,167 +596,194 @@ it('VERIFICAR: Login hace fetch al endpoint correcto', async () => {
     json: () => Promise.resolve({ token: 'mock-token' })
   })
   global.fetch = mockFetch
-
   const { authService } = await import('../../services/authService')
   await authService.login('test@restaurant.com', 'password123')
-
   expect(mockFetch).toHaveBeenCalledWith(
     expect.stringContaining('/api/auth/login'),
-    expect.objectContaining({
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    })
+    expect.objectContaining({ method: 'POST' })
   )
 })
 ```
 
-**¿Qué verifica?**
-- Que el servicio llama correctamente al endpoint `/api/auth/login`
-- Verifica la arquitectura: la comunicación con el "puerto" (API) es correcta
+**Texto para presentación:**
+> "Este test verifica la ARQUITECTURA: que el código llama al endpoint correcto. Es verificación técnica, no de negocio."
 
 ---
 
-#### 2. Test que VALIDA el Negocio (como "saldo negativo")
+## Test 46: 46-validar-negocio.test.ts ⭐⭐
 
-**Archivo:** `src/tests/auth/46-validar-negocio.test.ts`
-**Test:** "Token expirado NO permite acceso"
+**TDD:** RED → GREEN - TEST PRINCIPAL PARA EVALUACIÓN
 
+**Qué hace:**
+Valida tres reglas de negocio críticas:
+1. Token expirado NO permite acceso (como "saldo negativo")
+2. Credenciales inválidas NO crean sesión
+3. Sin token = sesión inválida (como cuenta bloqueada)
+
+**Código:**
 ```typescript
-it('VALIDAR: Token expirado NO permite acceso - como saldo negativo', () => {
+it('VALIDAR: Token expirado NO permite acceso - como "saldo negativo" en seguridad', async () => {
   const expiredDate = Date.now() - 1000
   localStorage.setItem('auth_token', 'expired-token')
   localStorage.setItem('auth_token_expiry', expiredDate.toString())
-  
-  const { authService } = require('../../services/authService')
-  
-  expect(authService.isAuthenticated()).toBe(false)
-})
-```
-
-**¿Qué valida?**
-- Regla de negocio: "Token expirado = acceso denegado"
-- Como el "saldo negativo" en finances: si está expirado, no es válido
-- Protege el sistema de sesiones inválidas
-
----
-
-### Ejemplo General: Test de Validación de Negocio
-
-**Archivo:** `src/tests/auth/44-validacion-negocio.test.ts`
-**Test:** "VALIDAR: Login con error NO guarda token"
-
-```typescript
-it('VALIDAR: Login con error NO guarda token', async () => {
-  // 1. MOCK: Simulo API que retorna error 401
-  global.fetch = vi.fn().mockResolvedValue({
-    ok: false,
-    status: 401
-  })
-
-  // 2. ACT: Llamo al servicio de login
   const { authService } = await import('../../services/authService')
-  await expect(
-    authService.login('wrong@email.com', 'wrongpass')
-  ).rejects.toThrow()
-
-  // 3. ASSERTIONS de VALIDACIÓN:
-  expect(localStorage.getItem('auth_token')).toBeNull()
   expect(authService.isAuthenticated()).toBe(false)
 })
 ```
 
-**¿Qué se mockea?**
-- `global.fetch` - Simula la respuesta del servidor
-- **¿Por qué?** Para no depender de un servidor real
-
-**¿Qué valida?**
-- Regla de negocio: "Si login falla, NO se crea sesión"
+**Texto para presentación:**
+> "Este test valida el NEGOCIO: son las reglas que protegen la seguridad. Como 'saldo negativo' en banking, aquí 'token expirado' o 'credenciales wrong' no permiten acceso."
 
 ---
 
-### Ejemplo 2: Test de Componente
+## Test 47: 47-edge-cases.test.ts
 
-**Archivo:** `src/tests/auth/34-LoginView-submit-login.test.tsx`
+**TDD:** RED → GREEN
+
+**Qué hace:**
+Casos extremos: email vacío, password vacío, múltiples logout, login dos veces.
+
+---
+
+## Test 48: 48-integracion.test.ts
+
+**TDD:** GREEN
+
+**Qué hace:**
+Tests de integración: login+logout completos, error de red, registro, loading state.
+
+---
+
+# PARTE 6: HUMAN CHECK
+
+## 6.1 Ejemplo 1: Test 18 (useAuth login)
+
+**Pregunta:** "¿Qué mockeas?"
 
 ```typescript
-// MOCK: Simulo el hook useAuth
-vi.mocked(useAuth).mockImplementation(() => ({
-  login: mockLogin,
-  register: vi.fn(),
-  logout: vi.fn(),
-  token: null,
-  isLoading: false,
-  error: null,
-  isAuthenticated: false,
-}))
-```
+// Mock 1: global.fetch
+global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ token: 'jwt-token-abc123' }) })
+// ¿Por qué? Simula respuestas del servidor HTTP sin llamar API real
 
-**¿Qué se mockea?**
-- `useAuth` - Hook de React para autenticación
-- **¿Por qué?** Aislar el componente del estado real
+// Mock 2: react-router-dom
+vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }))
+// ¿Por qué? Evita navegación real, aísla solo la lógica del hook
+```
 
 ---
 
-### Ejemplo 3: Test de Hook useAuth
+## 6.2 Ejemplo 2: Test 11 (Token Expirado)
 
-**Archivo:** `src/tests/auth/18-useAuth-login.test.ts`
+**Pregunta:** "¿Por qué sin mocks?"
 
 ```typescript
-// MOCK: Simulo respuesta exitosa de API
-global.fetch = vi.fn().mockResolvedValue({
-  ok: true,
-  json: () => Promise.resolve({ token: mockToken })
-})
-
-// MOCK: Navegación
-vi.mock('react-router-dom', () => ({
-  useNavigate: () => vi.fn(),
-}))
+// SIN MOCKS EXTERNOS
+// Usa localStorage real del navegador
+localStorage.setItem('auth_token', 'expired-token')
+localStorage.setItem('auth_token_expiry', expiredDate.toString())
+// ¿Por qué? El expiry es lógica de negocio pura, no depende de servicios externos
 ```
 
-**Mocks utilizados:**
-| Mock | Propósito |
-|------|-----------|
-| `global.fetch` | Simular llamadas HTTP |
-| `react-router-dom` | Aislar navegación |
+---
+
+## 6.3 Ejemplo 3: Test 46 (Validar Negocio)
+
+**Pregunta:** "¿Qué valida este test?"
+
+> "Valida la regla de negocio más importante: token expirado NO permite acceso. Es como 'saldo negativo' en seguridad bancaria - si está expirado, no es válido."
 
 ---
 
-## 7. Guía Rápida para el Human Check
+# PARTE 7: RESUMEN
 
-### Si te preguntan "¿Qué se mockea?"
+## Tests por Tipo
 
-**Responde con:**
-1. **Qué es** - El nombre del mock (ej: `global.fetch`, `useAuth`)
-2. **Para qué sirve** - Qué funcionalidad simula
-3. **Por qué es necesario** - Para no depender de externo
+| Tipo | Cantidad | Descripción |
+|------|----------|-------------|
+| **Verifica (GREEN)** | 30+ | El código funciona correctamente |
+| **Valida (RED→GREEN)** | 17+ | Las reglas de negocio se protegen |
 
-### Si te preguntan "¿Qué valida este test?"
+## Coverage
 
-**Responde con:**
-1. **Qué verifica** - El comportamiento esperado
-2. **Regla de negocio** - La protección que garantiza
-3. **Qué pasaría sin el test** - El bug que evitaría
-
-### Ejemplo de respuesta:
-
-**Pregunta:** "En el test 44, ¿qué significa que se mockea `global.fetch`?"
-
-**Respuesta:**n
-- "Mockeamos `global.fetch` para simular las respuestas del servidor"
-- "Sin el mock, los tests dependerían de un servidor API real"
-- "El mock nos permite controlar si la API retorna éxito o error"
-- "Esto nos permite probar casos como credenciales inválidas (401) sin necesidad de un backend"
+- **authService:** 97.36% statements, 88.88% branches
 
 ---
 
-## 8. Glosario
+# PARTE 9: HISTORIAS DE USUARIO
 
-| Término | Definición |
-|---------|------------|
-| TDD | Test-Driven Development |
-| Unit Test | Prueba de una unidad pequeña de código |
-| Integration Test | Prueba de múltiples unidades juntas |
-| E2E | End-to-End (extremo a extremo) |
-| Happy Path | Flujo principal sin errores |
-| Edge Case | Caso límite o poco común |
+## 9.1 HU Completadas
+
+| HU | Feature | Estado | Componente | Service | Hook | Tests |
+|----|---------|--------|------------|---------|------|-------|
+| HU-FRONT-001 | Login | ✅ Completado | `LoginView.tsx` | `authService.ts` | `useAuth.ts` | 48 tests |
+| HU-FRONT-002 | Registro de Usuario | ✅ Completado | `LoginView.tsx` | `authService.ts` | `useAuth.ts` | 15 tests |
+
+## 9.2 Detalle: Login (HU-FRONT-001)
+
+**Estado:** ✅ Completado
+
+**Componentes:**
+- `src/views/LoginView.tsx` - Interfaz de login
+- `src/services/authService.ts` - Lógica de autenticación
+- `src/hooks/useAuth.ts` - Hook de React para autenticación
+
+**Funcionalidades implementadas:**
+- ✅ Login con email/password
+- ✅ Login con remember me
+- ✅ Logout
+- ✅ Protección de rutas
+- ✅ Manejo de errores
+- ✅ Estado de carga (loading)
+- ✅ Modo demo
+
+## 9.3 Detalle: Registro de Usuario (HU-FRONT-002)
+
+**Estado:** ✅ Completado
+
+**Commits TDD Realizados:**
+
+| # | Commit | Tipo TDD | Descripción |
+|---|--------|----------|-------------|
+| 1 | `test: add register tests` | RED | Tests de authService.register |
+| 2 | `feat: implement register` | GREEN | Implementación de authService.register |
+| 3 | `test: add register tests to useAuth` | RED | Tests de useAuth.register |
+| 4 | `feat: add register to useAuth` | GREEN | Implementación de useAuth.register |
+| 5 | `feat: add register toggle to UI` | GREEN | Toggle login/register en UI |
+
+**Funcionalidades implementadas:**
+- ✅ Registro con email, username, password
+- ✅ Cambio entre modo login/registro
+- ✅ Validación de campos
+- ✅ Manejo de errores (username duplicado, error de red)
+
+## 9.4 HU Pendientes (Sin iniciar)
+
+| HU | Feature | Estado | Tests |
+|----|---------|--------|-------|
+| HU-FRONT-003 | Login con remember me | ⏳ Pendiente | 0 |
+| HU-FRONT-004 | Reset password | ⏳ Pendiente | 0 |
+| HU-FRONT-005 | Logout automático por inactividad | ⏳ Pendiente | 0 |
+
+---
+
+# PARTE 10: COMANDOS
+
+```bash
+npm test -- --run        # Ejecutar tests
+npm test -- --coverage   # Tests con coverage
+npm run lint             # Verificar código
+npm run build            # Compilar
+```
+
+---
+
+# PARTE 9: ORDEN PARA PRESENTACIÓN
+
+1. **TESTING_STRATEGY.md** - "Tenemos una estrategia clara"
+2. **Test 45** - "Verificar arquitectura: endpoint correcto"
+3. **Test 46** - "Validar negocio: token expirado = sin acceso"
+4. **Test 18** - "Ejemplo de mocks: fetch + router"
+5. **Test 19** - "Validación: error no crea sesión"
+6. **Correr tests:** `npm test -- --coverage`
+7. **Mostrar coverage:** authService 97.36%
+8. **Pipeline CI:** GitHub Actions configurado
