@@ -13,7 +13,10 @@
     "test:ui": "vitest --ui",
     "test:report": "vitest --run --reporter=verbose --reporter=junit",
     "test:ci": "vitest --run --reporter=junit --outputFile=test-results/junit.xml",
-    "test:coverage": "vitest --run --coverage"
+    "test:coverage": "vitest --run --coverage",
+    "cypress:run": "cypress run",
+    "cypress:open": "cypress open",
+    "test:e2e": "npm run preview -- --port 5173 & sleep 5 && npx cypress run --headless --project .; EXIT_CODE=$?; pkill -f 'vite preview' 2>/dev/null; exit $EXIT_CODE"
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -31,6 +34,7 @@
     "@vitest/coverage-v8": "^4.0.18",
     "@vitest/ui": "^4.0.18",
     "autoprefixer": "^10.4.23",
+    "cypress": "^15.11.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
