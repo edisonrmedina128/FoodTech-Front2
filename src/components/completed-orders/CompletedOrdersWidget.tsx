@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useCompletedOrders } from '../../hooks/useCompletedOrders';
 import { CompletedOrdersButton } from './CompletedOrdersButton';
 import { CompletedOrdersModal } from './CompletedOrdersModal';
-import { CompletedOrdersToast } from './CompletedOrdersToast';
+import { useToast } from '../../contexts/ToastContext';
 
 export const CompletedOrdersWidget = () => {
   const {
@@ -15,54 +15,23 @@ export const CompletedOrdersWidget = () => {
     invoiceErrorById,
   } = useCompletedOrders();
   const [isOpen, setIsOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const toastTimeoutRef = useRef<number | null>(null);
+  const toast = useToast();
 
-  useEffect(() => {
-    return () => {
-      if (toastTimeoutRef.current !== null) {
-        window.clearTimeout(toastTimeoutRef.current);
-        toastTimeoutRef.current = null;
-      }
-    };
-  }, []);
+  // cleanup ref no longer needed — toast context handles it
 
-  const handleToggle = () => {
-    setIsOpen((prev) => !prev);
-  };
-
-  const handleClose = () => {
-    setIsOpen(false);
-  };
+  const handleToggle = () => setIsOpen((prev) => !prev);
+  const handleClose = () => setIsOpen(false);
 
   const handleInvoice = async (orderId: number, customerName: string) => {
     const remainingCount = await requestInvoice(orderId, customerName);
-    setToastMessage(
-      'Factura enviada correctamente. En unos minutos llegara al correo del cliente.'
-    );
-    if (remainingCount === 0) {
-      setIsOpen(false);
-    }
-
-    if (toastTimeoutRef.current !== null) {
-      window.clearTimeout(toastTimeoutRef.current);
-    }
-
-    toastTimeoutRef.current = window.setTimeout(() => {
-      setToastMessage('');
-      toastTimeoutRef.current = null;
-    }, 4000);
-
+    toast.info('Solicitud de factura enviada — se procesará en breve');
+    if (remainingCount === 0) setIsOpen(false);
     return remainingCount;
   };
 
   return (
     <>
-      <CompletedOrdersButton
-        count={count}
-        onToggle={handleToggle}
-        isLoading={loading}
-      />
+      <CompletedOrdersButton count={count} onToggle={handleToggle} isLoading={loading} />
       {isOpen && (
         <CompletedOrdersModal
           isOpen={isOpen}
@@ -75,10 +44,6 @@ export const CompletedOrdersWidget = () => {
           invoiceErrorById={invoiceErrorById}
         />
       )}
-      <CompletedOrdersToast
-        message={toastMessage}
-        isVisible={toastMessage.length > 0}
-      />
     </>
   );
 };

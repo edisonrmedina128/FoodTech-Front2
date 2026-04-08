@@ -1,0 +1,22 @@
+# Dockerfile para demo/sustentación — skips Cypress binary download
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar package files
+COPY package.json package-lock.json* ./
+
+# Instalar dependencias SIN descargar el binario de Cypress
+# (Cypress solo lo necesitamos para correr e2e locales, no en Docker)
+ENV CYPRESS_INSTALL_BINARY=0
+
+RUN npm ci
+
+# Copiar código fuente
+COPY . .
+
+# Exponer puerto de Vite
+EXPOSE 5173
+
+# Vite dev server con --host para aceptar conexiones externas al contenedor
+CMD ["npm", "run", "dev", "--", "--host", "--port", "5173"]

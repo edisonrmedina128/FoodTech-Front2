@@ -7,7 +7,6 @@ export const LoginView = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
-  const [demoMode, setDemoMode] = useState(false)
   const [isRegisterMode, setIsRegisterMode] = useState(false)
 
   const { login, register, isLoading, error, isAuthenticated } = useAuth()
@@ -22,17 +21,10 @@ export const LoginView = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (demoMode) {
-      localStorage.setItem('auth_token', 'demo-token-12345')
-      navigate('/mesero')
-      return
-    }
-
     if (isRegisterMode) {
       await register(email, username, password)
     } else {
       await login(email, password, rememberMe)
-      
     }
   }
 
@@ -70,16 +62,14 @@ export const LoginView = () => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required={!demoMode}
-              disabled={demoMode}
+              required
               className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white-text 
-                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-                         disabled:opacity-40"
+                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="tu@email.com"
             />
           </div>
 
-          {/* Username (solo registro) */}
+            {/* Username (solo registro) */}
           {isRegisterMode && (
             <div>
               <label className="block text-sm text-silver-text mb-2">
@@ -90,11 +80,9 @@ export const LoginView = () => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                required={isRegisterMode && !demoMode}
-                disabled={demoMode}
+                required={isRegisterMode}
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white-text 
-                           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-                           disabled:opacity-40"
+                           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="tu usuario"
               />
             </div>
@@ -110,11 +98,9 @@ export const LoginView = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required={!demoMode}
-              disabled={demoMode}
+              required
               className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white-text 
-                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-                         disabled:opacity-40"
+                         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="••••••••"
             />
           </div>
@@ -126,8 +112,8 @@ export const LoginView = () => {
             </div>
           )}
 
-          {/* Remember me (solo login, no demo) */}
-          {!isRegisterMode && !demoMode && (
+          {/* Remember me (solo login) */}
+          {!isRegisterMode && (
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
@@ -141,23 +127,6 @@ export const LoginView = () => {
               </label>
             </div>
           )}
-
-          {/* Demo mode */}
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="demoMode"
-              checked={demoMode}
-              onChange={(e) => {
-                setDemoMode(e.target.checked)
-                if (e.target.checked) setRememberMe(false)
-              }}
-              className="h-4 w-4 accent-primary"
-            />
-            <label htmlFor="demoMode" className="text-sm text-silver-text">
-              Modo Demo(sin API)
-            </label>
-          </div>
 
           {/* Button */}
           <button

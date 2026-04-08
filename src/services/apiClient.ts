@@ -13,11 +13,17 @@ class ApiClient {
     this.baseUrl = baseUrl;
   }
 
+  private authHeaders(): Record<string, string> {
+    const token = localStorage.getItem('auth_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   async get<T>(endpoint: string): Promise<T> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        ...this.authHeaders(),
       },
     });
 
@@ -33,6 +39,7 @@ class ApiClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...this.authHeaders(),
       },
       body: JSON.stringify(data),
     });
@@ -49,6 +56,7 @@ class ApiClient {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...this.authHeaders(),
       },
       body: JSON.stringify(data),
     });
@@ -63,6 +71,7 @@ class ApiClient {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
+        ...this.authHeaders(),
       },
     });
 

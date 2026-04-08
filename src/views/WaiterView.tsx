@@ -10,6 +10,7 @@ import { KitchenStatus } from '../components/waiter/KitchenStatus';
 import { ProductType } from '../models/Product';
 import { MENU_PRODUCTS } from '../helpers/menuData';
 import { calculateTotalPrice } from '../helpers/orderCalculator';
+import { useToast } from '../contexts/ToastContext';
 
 /**
  * Vista principal del mesero
@@ -45,8 +46,9 @@ export const WaiterView = () => {
     ProductType | 'ALL'
   >('ALL');
 
-  /**
-   * Sincroniza el estado de las mesas con las tareas cada vez que cambian
+  const toast = useToast();
+
+  /**con las tareas cada vez que cambian
    */
   useEffect(() => {
     syncTablesWithTasks(tasks);
@@ -57,24 +59,18 @@ export const WaiterView = () => {
    */
   const handleSubmitOrder = async () => {
     if (!selectedTable) {
-      alert('Por favor selecciona una mesa');
+      toast.warn('Por favor selecciona una mesa');
       return;
     }
 
     const response = await submitOrder(selectedTable.number);
 
     if (response) {
-      // Marcar mesa como ocupada
       markTableAsOccupied(selectedTable.id, response.orderId);
-
-      // Refrescar tareas
       await refreshTasks();
-
-      alert(
-        `✅ ${response.message}\n\nMesa: ${response.tableNumber}\nTareas creadas: ${response.tasksCreated}`
-      );
+      toast.success(`Pedido enviado · Mesa ${response.tableNumber} · ${response.tasksCreated} tarea${response.tasksCreated !== 1 ? 's' : ''} creada${response.tasksCreated !== 1 ? 's' : ''}`);
     } else if (error) {
-      alert(`❌ Error: ${error}`);
+      toast.error(`Error al enviar pedido: ${error}`);
     }
   };
 

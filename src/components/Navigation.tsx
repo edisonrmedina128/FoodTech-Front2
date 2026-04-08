@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { LogoutButton } from './LogoutButton';
+import { WorkerHealthBadge } from './WorkerHealthBadge';
 
 export function Navigation() {
   const navLinks = [
@@ -42,6 +43,9 @@ export function Navigation() {
             </NavLink>
           ))}
           
+          {/* Worker Health */}
+          <WorkerHealthBadge />
+
           {/* Logout */}
           <LogoutButton />
         </div>
